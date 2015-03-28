@@ -155,11 +155,13 @@ char *ip = inet_ntoa(client_info.sin_addr);
  printf("[*]Client Connected: %s\n",ip);
  printf("[i] %d clients connected.\n",connection_counter);
 
-
+//____________MAIN RECEIVE LOOP
  while(recv(Client,databuffer,200,0) != SOCKET_ERROR){ //While the client is still connected
+    if(*databuffer == '*') printf("Ping from \t ID:%d \t  IP:%s\n" , GetCurrentThreadId(),ip);
 
-    printf("%s \t ID:%d \t  IP:%s\n" ,databuffer, GetCurrentThreadId(),ip); //Print out whatever our client spits at us , with an ID
+    //Print out whatever our client spits at us , with an ID
                                 }
+//____________MAIN RECEIVE LOOP END
 
 
  printf("[!]Client %d disconnected!\n" , GetCurrentThreadId());
