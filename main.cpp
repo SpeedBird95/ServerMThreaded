@@ -69,8 +69,8 @@ if (!he)
 
   for(i = 0; addr_list[i] != NULL; i++) { //cycle thru possible hosts
          printf("[i]Host Found:%s ", inet_ntoa(*addr_list[i]));
-         addr.sin_addr.S_un.S_addr = INADDR_ANY;
-       // addr.sin_addr.S_un.S_addr = htonl(inet_addr(inet_ntoa(*addr_list[i]))); //SET OUR FUCKING IP TO RESOLVED DNS !
+        // addr.sin_addr.S_un.S_addr = INADDR_ANY;
+        addr.sin_addr.S_un.S_addr = htonl(inet_addr(inet_ntoa(*addr_list[i]))); //SET OUR FUCKING IP TO RESOLVED DNS !
          break;
     }
   }
