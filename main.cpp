@@ -1,50 +1,49 @@
 //Winsock server with multi-client (multithreaded) handling.
 
-//Use latest winsock (includes windows.h)
-#include <windows.h>
-#include <windns.h>
-#include <ws2tcpip.h>
-#include <iostream>
+//getting head
 #include <winsock2.h>
+#include <windns.h>
+#include <iostream>
 #include <process.h>
 #include <stdio.h>
 #include <string>
-#include <iomanip>
-#include "infix_interator.h"
+
 
 using namespace std;
+
 //-----Prototypes and global vars
-void ReverseIP(char* pIP);
 unsigned int __stdcall ServClient(void*data);
-
-
-
-// BEGIN!!!!
-int main(int argc, _TCHAR* argv[]){
-
 WSADATA wsaData;
-
 int iResult; //Validity switch
 sockaddr_in addr;
 SOCKET sock,client;
-addr.sin_family = AF_INET;
-
+SOCKADDR_IN client_info = {0}; //To get Client ip
+int addrsize = sizeof(client_info); //To get ip
+struct hostent *he; //Stupid addr struct to hold our resolved IP
+struct in_addr **addr_list; //Stupid addr struct to hold our resolved IP
+int i;  // Placmarker for struct
+string hostname;
 int PORT;
-    printf("______________Project Z alpha 0.0.3____________\n");
+unsigned short int connection_counter = 0;
+//--------------------------------
 
 
+// =======================================================================BEGIN!!!!======================================================
+int main(int argc, _TCHAR* argv[]){
 
-addr.sin_port = htons(PORT); //Listen port
-
-//addr.sin_addr.S_un.S_addr = inet_addr(SERVER_ADDRS.c_str()); //Listen IP
-
-
-//________________________________BEGIN________________________
-
-//_____Startup check , if you have problems here you got problems everywur_____
-
+//________WSA Prep
+addr.sin_family = AF_INET;
 iResult = WSAStartup(MAKEWORD(2,2),&wsaData);
+//_______
 
+printf("______________Project Z alpha 0.0.3____________\n");
+
+
+
+
+
+
+//____WSA Init check
 if(iResult){
 
         printf("[X]WSA Startup failure..");
@@ -54,30 +53,32 @@ if(iResult){
 
 
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~DNS LOOKUP , HOLY SHIT THIS IS MESSY BUT IT WORKS!!!!! ~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~IP Resolveer , HOLY SHIT THIS IS MESSY BUT IT WORKS!!!!! ~~~~~~~~~~~~~~~~~~~~~~
 START:
- printf("\n-[Listen on (DNS)]: ");
-string hostname;
-struct hostent *he;
-struct in_addr **addr_list;
-int i;
+
+
+ printf("\n-[Listen on (DNS/IP)]: ");
 cin >> hostname;
- printf("Resolving: %s ......\n", hostname.c_str());
+ printf("[i]Checking host: %s ......\n", hostname.c_str());
 he = gethostbyname(hostname.c_str()); //convert string to char array and look it up
 if (!he)
-  { puts("Host not found");
+  { puts("[i]Host could not be resolved..");
     goto START; //try again
   }else{
   addr_list = (struct in_addr **)he->h_addr_list;
 
   for(i = 0; addr_list[i] != NULL; i++) { //cycle thru possible hosts
-         printf("Host Found:%s ", inet_ntoa(*addr_list[i]));
+         printf("[i]Host Found:%s ", inet_ntoa(*addr_list[i]));
          //addr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
         addr.sin_addr.S_un.S_addr = inet_addr(inet_ntoa(*addr_list[i])); //SET OUR FUCKING IP TO RESOLVED DNS !
          break;
     }
   }
+
 /// ~~~~~~~~~~~~~~~~~~ DNS DONE ~~~~~~~~~~~~~~~
+
+
+
 
 //__________Set Port_________
 
@@ -93,14 +94,13 @@ if(sock == INVALID_SOCKET){
         return 0;
 
                         }
-///_____________
 
 
 //_____Bind +check on the ip and port so we can start to listen. If we get an error here the port or IP pay already be bided elsewhere_____
 iResult = bind(sock,(sockaddr*)&addr,sizeof(sockaddr_in)); //bind throws 1 if error
 if( iResult ){
-    printf("[X]Bind failed...Already binded on port?\n");
-    return 0;
+    printf("[X]Bind failed...Already binded on port? Correct DNS?\n");
+     goto START; //try again
 }
 ///_______________
 
@@ -109,13 +109,16 @@ if( iResult ){
 iResult = listen(sock,SOMAXCONN); //Throws 1 if invalid like bind
 if(iResult){
     printf("[X]Failed to listen..\n");
-    return 0;
+      goto START; //try again
 }
 //____________
 
-   printf("Listening on %s on port %d\n" ,inet_ntoa(*addr_list[i]),PORT);
+   printf("[i]Listening on %s on port %d\n" ,inet_ntoa(*addr_list[i]),PORT);
 
 //_________________HANDLE CONNECTIONS__________
+//This is the loop that keeps the program alive
+while(1){
+
 while(client= accept(sock,0,0)) //There is a break in execution here
 {
     if(client == INVALID_SOCKET)
@@ -126,6 +129,7 @@ while(client= accept(sock,0,0)) //There is a break in execution here
     }
     _beginthreadex(0,0,ServClient,(void*)&client,0,0); //Begin a new thread of execution passing in client socket and using servclient func, then go back to break to wait for more clients
 }
+}
 //_____________________
 
 return 0;
@@ -133,20 +137,37 @@ return 0;
 } //master main brace
 
 //-------------------Declare ServClient , our smart ass multi thread handler-------------
-unsigned int __stdcall ServClient(void *data){
+unsigned int __stdcall ServClient(void*data){
 
-
-SOCKET* pclient = (SOCKET*)data; //Assign our generic pointer data(casted to a sock pointer ) from func into a socket pointer
-SOCKET Client = *pclient; //Derefrence into usable data
- printf("[*]Client Connected\n");
-
+ connection_counter++; //+1 to the client counter
  char databuffer[200]; //Data buffer to get from this particular client
 
- while(recv(Client,databuffer,200,0)){
+ //__Convert void socket data to socket data
+ SOCKET* pclient = (SOCKET*)data; //Assign our generic pointer data(casted to a sock pointer ) from func into a socket pointer
+SOCKET Client = *pclient; //Derefrence into usable data
+//__
 
-    printf("%s \t %d\n" ,databuffer, GetCurrentThreadId()); //Print out whatever our client spits at us , with an ID
+ //___Get IP
+getpeername(Client, (sockaddr*)&client_info, &addrsize);
+char *ip = inet_ntoa(client_info.sin_addr);
+//____
+
+ printf("[*]Client Connected: %s\n",ip);
+ printf("[i] %d clients connected.\n",connection_counter);
+
+
+ while(recv(Client,databuffer,200,0) != SOCKET_ERROR){ //While the client is still connected
+
+    printf("%s \t ID:%d \t  IP:%s\n" ,databuffer, GetCurrentThreadId(),ip); //Print out whatever our client spits at us , with an ID
                                 }
-                                return 0;
+
+
+ printf("[!]Client %d disconnected!\n" , GetCurrentThreadId());
+ closesocket(Client);
+ connection_counter--; //Update connected counter
+  printf("[i] %d clients connected.\n",connection_counter);
+
+return 0;
 
 
 }

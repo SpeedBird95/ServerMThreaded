@@ -1,13 +1,9 @@
 # depslib dependency file v1.0
-1427549872 source:c:\users\ameen\documents\cpp\server\servermthreaded\main.cpp
-	<windows.h>
-	<windns.h>
-	<ws2tcpip.h>
-	<iostream>
+1427567027 source:c:\users\ameen\documents\cpp\server\servermthreaded\main.cpp
 	<winsock2.h>
+	<windns.h>
+	<iostream>
 	<process.h>
 	<stdio.h>
 	<string>
-	<iomanip>
-	"infix_interator.h"
 
