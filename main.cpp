@@ -159,7 +159,7 @@ char *ip = inet_ntoa(client_info.sin_addr);
  while(recv(Client,databuffer,200,0) != SOCKET_ERROR){ //While the client is still connected
     if(*databuffer == 00) printf("[i]Ping from \t ID:%d \t  IP:%s\n" , GetCurrentThreadId(),ip); //Ping command * received
     if(*databuffer == 01) printf("[!]Legue of legends open on  \t ID:%d \t  IP:%s\n" , GetCurrentThreadId(),ip); //Window open command 0 received
-    if(*databuffer == 02) printf("[i]Ping from \t ID:%d \t  IP:%s\n" , GetCurrentThreadId(),ip); //Window focus command
+    if(*databuffer == 02) printf("[i]LoL currently in focus from \t ID:%d \t  IP:%s\n" , GetCurrentThreadId(),ip); //Window focus command
      //
 
 
